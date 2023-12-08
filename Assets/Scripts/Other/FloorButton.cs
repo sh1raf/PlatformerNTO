@@ -8,11 +8,12 @@ public class FloorButton : MonoBehaviour
 
     private List<Rigidbody2D> _collisions = new();
 
+
     private void OnTriggerStay2D(Collider2D collision)
     {
         if(collision.GetComponent<Rigidbody2D>().mass > 15 && !door.IsOpen)
         {
-                door.Open();
+            door.Open();
         }
         else if(door.IsOpen)
             door.Close();

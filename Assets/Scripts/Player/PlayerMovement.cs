@@ -21,15 +21,23 @@ public class PlayerMovement : MonoBehaviour
 
     private float _expiredTime;
 
+    private Animator _animator;
+
 
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
+        _animator = GetComponentInChildren<Animator>();
     }
 
     public void Move(Vector2 direction)
     {
          _rb.velocity = Vector2.Lerp(_rb.velocity, new Vector2(direction.x * speed, _rb.velocity.y), smoothness);
+        if (_rb.velocity.x > 0f && transform.localScale.x == -1)
+            transform.localScale = new Vector3(1, 2, 1);
+        else if(_rb.velocity.x < 0f && transform.localScale.x == 1f)
+            transform.localScale = transform.localScale = new Vector3(-1, 2, 1);
+        _animator.SetFloat("Move", direction.magnitude);
     }
 
     public void Jump()
@@ -38,6 +46,7 @@ public class PlayerMovement : MonoBehaviour
         {
             _expiredTime = 0;
             _rb.AddForce(jumpForce * Vector2.up, ForceMode2D.Impulse);
+            _animator.SetTrigger("Jump");
         }
 
         Debug.Log("JUMP");

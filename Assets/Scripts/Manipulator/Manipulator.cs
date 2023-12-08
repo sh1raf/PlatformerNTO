@@ -16,17 +16,26 @@ public class Manipulator : MonoBehaviour
 
     [SerializeField] private float step;
 
+    [SerializeField] private LayerMask grabLayers;
+
     private bool _isActionEnded { get; set; } = true;
 
     private Queue<Action> _q = new();
 
     private void Awake()
     {
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 2; i++)
         {
             _q.Enqueue(HorizontalStep);
-            _q.Enqueue(VerticalStep);
         }
+
+        for(int i = 0; i < 3; i++)
+        {
+            _q.Enqueue(VerticalStepBack);
+        }
+        _q.Enqueue(Grab);
+        _q.Enqueue(VerticalStep);
+        _q.Enqueue(UnGrab);
 
         StartCoroutine(StartActions());
     }
@@ -81,20 +90,38 @@ public class Manipulator : MonoBehaviour
 
     public void HorizontalStep()
     {
-        Debug.Log("@");
-
         StartCoroutine(Move(transform.position + new Vector3(step, 0f, 0f)));
     }
 
     public void VerticalStep()
     {
-        Debug.Log("$");
-
         StartCoroutine(Move(transform.position + new Vector3(0f, step, 0f)));
+    }
+
+    public void VerticalStepBack()
+    {
+        StartCoroutine(Move(transform.position - new Vector3(0f, step, 0f)));
     }
 
     public void Grab()
     {
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, GetComponent<CircleCollider2D>().radius, grabLayers);
 
+        foreach(var collider in colliders)
+        {
+            collider.transform.parent = transform;
+            if (collider.GetComponent<Rigidbody2D>())
+                collider.GetComponent<Rigidbody2D>().isKinematic = true;
+        }
+    }
+
+    public void UnGrab()
+    {
+        foreach(var child in GetComponentsInChildren<Collider2D>())
+        {
+            child.transform.parent = null;
+            if (child.GetComponent<Rigidbody2D>())
+                child.GetComponent<Rigidbody2D>().isKinematic = false;
+        }
     }
 }

@@ -7,11 +7,12 @@ TagManager:
   - floor
   - RedZone
   - CheckPoint
+  - Boxes
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Grabbed
   - Water
   - UI
   - 
