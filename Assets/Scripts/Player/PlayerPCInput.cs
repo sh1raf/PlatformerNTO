@@ -1,11 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using UnityEngine;
+using Zenject;
 
 public class PlayerPCInput : MonoBehaviour
 {
     [SerializeField] private PlayerMovement _player;
     private PlayerInput _input;
+
+    public PlayerInput Input { get { return _input; } }
 
     private bool _isJumping = false;
 
@@ -15,14 +19,14 @@ public class PlayerPCInput : MonoBehaviour
     private void Awake()
     {
         _input = new PlayerInput();
-        _input.Player.Jump.performed += context => StartJump();
-        _input.Player.Jump.canceled += context => EndJumping();
-        _input.Player.Action.performed += context => Action();
+        _input.Enable();
     }
 
     private void OnEnable()
     {
-        _input.Enable();
+        _input.Player.Jump.performed += context => StartJump();
+        _input.Player.Jump.canceled += context => EndJumping();
+        _input.Player.Action.performed += context => Action();
     }
 
     private void StartJump()
@@ -69,7 +73,9 @@ public class PlayerPCInput : MonoBehaviour
 
     public void DisableInput()
     {
-        OnDisable();
+        _input.Player.Jump.performed -= context => StartJump();
+        _input.Player.Jump.canceled -= context => EndJumping();
+        _input.Player.Action.performed -= context => Action();
     }
 
     private void OnDisable()

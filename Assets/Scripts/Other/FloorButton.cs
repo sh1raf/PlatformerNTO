@@ -21,13 +21,13 @@ public class FloorButton : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.GetComponent<Rigidbody2D>())
+        if (collision.GetComponentInParent<Rigidbody2D>())
             _collisions.Add(collision.GetComponent<Rigidbody2D>());
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.GetComponent<Rigidbody2D>())
+        if (collision.GetComponentInParent<Rigidbody2D>())
             _collisions.Remove(collision.GetComponent<Rigidbody2D>());
     }
 

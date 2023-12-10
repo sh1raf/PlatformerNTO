@@ -45,13 +45,13 @@ public class Scaner : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.GetComponent<Rigidbody2D>().mass > 15)
+        if (collision.GetComponentInParent<Rigidbody2D>().mass > 15)
             _collisions.Add(collision.GetComponent<Rigidbody2D>());
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.GetComponent<Rigidbody2D>().mass > 15)
+        if (collision.GetComponentInParent<Rigidbody2D>().mass > 15)
             _collisions.Remove(collision.GetComponent<Rigidbody2D>());
     }
 }

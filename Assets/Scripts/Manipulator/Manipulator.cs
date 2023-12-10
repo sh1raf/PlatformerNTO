@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -18,26 +19,19 @@ public class Manipulator : MonoBehaviour
 
     [SerializeField] private LayerMask grabLayers;
 
+    private Vector3 _velocity;
+
     private bool _isActionEnded { get; set; } = true;
 
     private Queue<Action> _q = new();
 
+    public event Action ActionsEnd, OnStartPoint;
+
+    private Vector2 _startPoint;
+
     private void Awake()
     {
-        for (int i = 0; i < 2; i++)
-        {
-            _q.Enqueue(HorizontalStep);
-        }
-
-        for(int i = 0; i < 3; i++)
-        {
-            _q.Enqueue(VerticalStepBack);
-        }
-        _q.Enqueue(Grab);
-        _q.Enqueue(VerticalStep);
-        _q.Enqueue(UnGrab);
-
-        StartCoroutine(StartActions());
+        _startPoint = transform.position;
     }
 
     public bool IsActionEnded() { return _isActionEnded; } 
@@ -45,6 +39,29 @@ public class Manipulator : MonoBehaviour
     public void AddHorizontalStep()
     {
         _q.Enqueue(HorizontalStep);
+    }
+
+    public void AddHorizontalStepBack()
+    {
+        _q.Enqueue(HorizontalStepBack);
+    }
+
+    public void AddVerticalStep()
+    {
+        _q.Enqueue(VerticalStep);
+    }
+    public void AddVerticalStepBack()
+    {
+        _q.Enqueue(VerticalStepBack);
+    }
+    public void AddGrab()
+    {
+        _q.Enqueue(Grab);
+    }
+
+    public void AddUnGrab()
+    {
+        _q.Enqueue(UnGrab);
     }
 
     public IEnumerator StartActions()
@@ -59,7 +76,31 @@ public class Manipulator : MonoBehaviour
             action.Invoke();
         }
 
+        yield return new WaitUntil(new Func<bool>(IsActionEnded));
+
         _q.Clear();
+        StartCoroutine(GoStart());
+        yield return new WaitForSeconds(3f);
+
+        ActionsEnd?.Invoke();
+    }
+
+    private IEnumerator GoStart()
+    {
+        UnGrab();
+
+        var expiredTime = 0f;
+
+        while(Vector2.Distance(transform.position, _startPoint) > 0.1f && expiredTime <= 5f)
+        {
+            transform.position = Vector3.SmoothDamp(transform.position, _startPoint, ref _velocity, 1f);
+            expiredTime += Time.deltaTime;
+            yield return null;
+        }
+
+        transform.position = _startPoint;
+
+        OnStartPoint?.Invoke();
     }
 
     private IEnumerator Move(Vector2 targetPosition)
@@ -71,13 +112,11 @@ public class Manipulator : MonoBehaviour
         {
             while(Vector2.Distance(transform.position, targetPosition) > 0.02f)
             {
-                transform.position = Vector2.Lerp(transform.position, targetPosition, 0.5f * speed * Time.deltaTime);
+                transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref _velocity, 1f);
                 yield return null;
             }
 
             transform.position = targetPosition;
-
-            yield return new WaitForSeconds(1f);
         }
         else
         {
@@ -91,6 +130,11 @@ public class Manipulator : MonoBehaviour
     public void HorizontalStep()
     {
         StartCoroutine(Move(transform.position + new Vector3(step, 0f, 0f)));
+    }
+
+    private void HorizontalStepBack()
+    {
+        StartCoroutine(Move(transform.position - new Vector3(step, 0f, 0f)));
     }
 
     public void VerticalStep()

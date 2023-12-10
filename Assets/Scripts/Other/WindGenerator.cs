@@ -9,7 +9,15 @@ public class WindGenerator : ActionObject
     [SerializeField] private Transform wind;
     [SerializeField] private List<float> angles = new();
 
+    private AreaEffector2D effector;
+
     private int _currentAngleIndex = 0;
+
+    private void Awake()
+    {
+        effector = GetComponentInChildren<AreaEffector2D>();
+    }
+
     public override void Action()
     {
         if(isActive)
@@ -29,5 +37,10 @@ public class WindGenerator : ActionObject
         else
             _currentAngleIndex = 0;
         wind.eulerAngles = new Vector3(0,0, angles[_currentAngleIndex]);
+    }
+
+    public void ChangeMagnitude(float strength)
+    {
+        effector.forceMagnitude = strength;
     }
 }
